@@ -88,3 +88,48 @@ Deno.test({
     assertEquals(runner.build("extended-3")[0].cmd, ["sh", "build.sh"]);
   },
 });
+
+Deno.test({
+  name: "runner | build | arguments passthrough",
+  fn(): void {
+    const config: RunnerConfig = {
+      scripts: {
+        "simple": {
+          cmd: "deno test myfile.ts --param"
+        },
+        "multiple": {
+          cmd: "deno test myfile.ts --param --param2 value2 --param3"
+        },
+        "spaces": {
+          cmd: "deno test myfile.ts --param --param2 \"value 2\" --param3"
+        }
+      }
+    };
+    const runner = new Runner(config);
+
+    assertEquals(runner.build("simple")[0].cmd, [
+      "deno",
+      "test",
+      "myfile.ts",
+      "--param"
+    ]);
+    assertEquals(runner.build("multiple")[0].cmd, [
+      "deno",
+      "test",
+      "myfile.ts",
+      "--param",
+      "--param2",
+      "value2",
+      "--param3"
+    ]);
+    assertEquals(runner.build("spaces")[0].cmd, [
+      "deno",
+      "test",
+      "myfile.ts",
+      "--param",
+      "--param2",
+      "value 2",
+      "--param3"
+    ]);
+  }
+})
